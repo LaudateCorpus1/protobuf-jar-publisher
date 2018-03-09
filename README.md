@@ -1,4 +1,4 @@
-Protobuf JAR Publisher
+Protobuf JAR Publisher ![Docker Automated build](https://img.shields.io/docker/automated/avastsoftware/protobuf-jar-publisher.svg)
 ----------------------
 Docker image that compiles `proto` files to single JAR and publishes it to a Maven repository.
 
