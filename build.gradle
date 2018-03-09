@@ -1,0 +1,82 @@
+buildscript {
+    repositories {
+        mavenCentral()
+    }
+    dependencies {
+        classpath 'com.google.protobuf:protobuf-gradle-plugin:0.8.4'
+    }
+}
+
+apply plugin: 'java'
+apply plugin: 'maven-publish'
+apply plugin: 'com.google.protobuf'
+
+group findProperty('groupId')
+version = version == 'unspecified' ? 'DEVELOPER-SNAPSHOT' : version
+
+sourceCompatibility = JavaVersion.VERSION_1_8
+
+ext {
+    protocVersion = findProperty('protocVersion')
+    assert protocVersion : 'protocVersion property is required'
+    protobufJavaVersion = findProperty('protobufJavaVersion')
+    assert protobufJavaVersion : 'protobufJavaVersion property is required'
+    grpcVersion = findProperty('grpcVersion')
+}
+
+if (file('/in').exists()) {
+    copy {
+        from '/in'
+        into "$projectDir/src/main/proto"
+    }
+}
+
+repositories {
+    maven {
+        url findProperty('mavenUrl') ?: mavenCentral().url
+    }
+}
+
+dependencies {
+    compile "com.google.protobuf:protobuf-java:$protobufJavaVersion"
+    if (grpcVersion) {
+        compile "io.grpc:grpc-stub:$grpcVersion"
+        compile "io.grpc:grpc-protobuf:$grpcVersion"
+    }
+}
+
+protobuf {
+    protoc {
+        artifact = "com.google.protobuf:protoc:$protocVersion"
+    }
+    if (grpcVersion) {
+        plugins {
+            grpc {
+                artifact = "io.grpc:protoc-gen-grpc-java:$grpcVersion"
+            }
+        }
+        generateProtoTasks {
+            all()*.plugins {
+                grpc {}
+            }
+        }
+    }
+}
+
+publishing {
+    repositories {
+        maven {
+            url = findProperty('publishMavenUrl') ?: findProperty('mavenUrl') ?: mavenCentral().url
+            credentials {
+                username = findProperty('mavenUsername')
+                password = findProperty('mavenPassword')
+            }
+        }
+    }
+    publications {
+        mavenJava(MavenPublication) {
+            from components.java
+            artifactId = findProperty('artifactId')
+        }
+    }
+}
