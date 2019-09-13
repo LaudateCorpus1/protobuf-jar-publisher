@@ -3,7 +3,7 @@ buildscript {
         mavenCentral()
     }
     dependencies {
-        classpath 'com.google.protobuf:protobuf-gradle-plugin:0.8.4'
+        classpath 'com.google.protobuf:protobuf-gradle-plugin:0.8.10'
     }
 }
 
@@ -17,10 +17,8 @@ version = version == 'unspecified' ? 'DEVELOPER-SNAPSHOT' : version
 sourceCompatibility = JavaVersion.VERSION_1_8
 
 ext {
-    protocVersion = findProperty('protocVersion')
-    assert protocVersion : 'protocVersion property is required'
-    protobufJavaVersion = findProperty('protobufJavaVersion')
-    assert protobufJavaVersion : 'protobufJavaVersion property is required'
+    protobufVersion = findProperty('protobufVersion')
+    assert protobufVersion : 'protobufVersion property is required'
     grpcVersion = findProperty('grpcVersion')
 }
 
@@ -38,16 +36,17 @@ repositories {
 }
 
 dependencies {
-    compile "com.google.protobuf:protobuf-java:$protobufJavaVersion"
+    compile "com.google.protobuf:protobuf-java:$protobufVersion"
     if (grpcVersion) {
         compile "io.grpc:grpc-stub:$grpcVersion"
         compile "io.grpc:grpc-protobuf:$grpcVersion"
     }
+    compileOnly 'javax.annotation:javax.annotation-api:1.3.2'
 }
 
 protobuf {
     protoc {
-        artifact = "com.google.protobuf:protoc:$protocVersion"
+        artifact = "com.google.protobuf:protoc:$protobufVersion"
     }
     if (grpcVersion) {
         plugins {
